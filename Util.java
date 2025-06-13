@@ -1,652 +1,609 @@
-package okhttp3.internal;
+package com.mysql.jdbc;
 
-import I1I.I丨iL.IL1Iii;
-import I1I.I丨iL.ILil;
-import I丨L.I1I;
-import I丨L.IL丨丨l;
-import I丨L.iI丨LLL1;
-import I丨L.l丨Li1LL;
-import I丨L.丨lL;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InterruptedIOException;
+import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.IDN;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.AccessControlException;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.TimeZone;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import javax.annotation.Nullable;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-import okhttp3.Headers;
-import okhttp3.HttpUrl;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import okhttp3.internal.http2.Header;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public final class Util {
-  public static final byte[] EMPTY_BYTE_ARRAY;
+public class Util {
+  private static final String MYSQL_JDBC_PACKAGE_ROOT;
   
-  public static final Headers EMPTY_HEADERS;
+  private static Util enclosingInstance = new Util();
   
-  public static final RequestBody EMPTY_REQUEST;
+  private static final ConcurrentMap<Class<?>, Class<?>[]> implementedInterfacesCache;
   
-  public static final ResponseBody EMPTY_RESPONSE;
+  private static boolean isColdFusion;
   
-  public static final String[] EMPTY_STRING_ARRAY = new String[0];
+  private static boolean isJdbc4;
   
-  public static final Comparator<String> NATURAL_ORDER;
+  private static boolean isJdbc42;
   
-  private static final IL丨丨l UNICODE_BOMS;
+  private static final ConcurrentMap<Class<?>, Boolean> isJdbcInterfaceCache;
   
-  public static final TimeZone UTC;
+  private static int jvmUpdateNumber;
   
-  private static final Charset UTF_32BE;
-  
-  private static final Charset UTF_32LE;
-  
-  private static final Pattern VERIFY_AS_IP_ADDRESS;
-  
-  private static final Method addSuppressedExceptionMethod;
+  private static int jvmVersion = -1;
   
   static {
-    EMPTY_HEADERS = Headers.of(new String[0]);
-    Method method = null;
-    EMPTY_RESPONSE = ResponseBody.create((MediaType)null, arrayOfByte);
-    EMPTY_REQUEST = RequestBody.create((MediaType)null, arrayOfByte);
-    UNICODE_BOMS = IL丨丨l.I丨L(new iI丨LLL1[] { iI丨LLL1.decodeHex("efbbbf"), iI丨LLL1.decodeHex("feff"), iI丨LLL1.decodeHex("fffe"), iI丨LLL1.decodeHex("0000ffff"), iI丨LLL1.decodeHex("ffff0000") });
-    UTF_32BE = Charset.forName("UTF-32BE");
-    UTF_32LE = Charset.forName("UTF-32LE");
-    UTC = TimeZone.getTimeZone("GMT");
-    NATURAL_ORDER = IL1Iii.IL1Iii;
+    jvmUpdateNumber = -1;
+    isColdFusion = false;
+    boolean bool = true;
     try {
-      Method method1 = Throwable.class.getDeclaredMethod("addSuppressed", new Class[] { Throwable.class });
-      method = method1;
-    } catch (Exception exception) {}
-    addSuppressedExceptionMethod = method;
-    VERIFY_AS_IP_ADDRESS = Pattern.compile("([0-9a-fA-F]*:[0-9a-fA-F:.]*)|([\\d.]+)");
-  }
-  
-  public static void addSuppressedIfPossible(Throwable paramThrowable1, Throwable paramThrowable2) {
-    Method method = addSuppressedExceptionMethod;
-    if (method != null)
-      try {
-        method.invoke(paramThrowable1, new Object[] { paramThrowable2 });
-      } catch (InvocationTargetException|IllegalAccessException invocationTargetException) {} 
-  }
-  
-  public static Charset bomAwareCharset(l丨Li1LL paraml丨Li1LL, Charset paramCharset) throws IOException {
-    int i = paraml丨Li1LL.L11丨丨丨1(UNICODE_BOMS);
+      Class.forName("java.sql.NClob");
+      isJdbc4 = true;
+    } catch (ClassNotFoundException classNotFoundException) {
+      isJdbc4 = false;
+    } 
+    try {
+      Class.forName("java.sql.JDBCType");
+      isJdbc42 = true;
+    } finally {
+      Exception exception = null;
+    } 
+    int i = str.indexOf('.');
+    int j = i + 1;
     if (i != -1) {
-      if (i != 0) {
-        if (i != 1) {
-          if (i != 2) {
-            if (i != 3) {
-              if (i == 4)
-                return UTF_32LE; 
-              throw new AssertionError();
-            } 
-            return UTF_32BE;
-          } 
-          return StandardCharsets.UTF_16LE;
+      int k = j;
+      while (true) {
+        i = k;
+        if (Character.isDigit(str.charAt(k))) {
+          i = ++k;
+          if (k < str.length())
+            continue; 
         } 
-        return StandardCharsets.UTF_16BE;
+        break;
       } 
-      return StandardCharsets.UTF_8;
+    } else {
+      i = j;
     } 
-    return paramCharset;
-  }
-  
-  public static String canonicalizeHost(String paramString) {
-    if (paramString.contains(":")) {
-      InetAddress inetAddress;
-      if (paramString.startsWith("[") && paramString.endsWith("]")) {
-        inetAddress = decodeIpv6(paramString, 1, paramString.length() - 1);
+    if (i > j) {
+      jvmVersion = Integer.parseInt(str.substring(j, i));
+    } else {
+      if (isJdbc42) {
+        i = 8;
+      } else if (isJdbc4) {
+        i = 6;
       } else {
-        inetAddress = decodeIpv6(paramString, 0, paramString.length());
+        i = 5;
       } 
-      if (inetAddress == null)
-        return null; 
-      byte[] arrayOfByte = inetAddress.getAddress();
-      if (arrayOfByte.length == 16)
-        return inet6AddressToAscii(arrayOfByte); 
-      if (arrayOfByte.length == 4)
-        return inetAddress.getHostAddress(); 
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("Invalid IPv6 address: '");
-      stringBuilder.append(paramString);
-      stringBuilder.append("'");
-      throw new AssertionError(stringBuilder.toString());
+      jvmVersion = i;
     } 
+    i = str.indexOf("_");
+    j = i + 1;
+    if (i != -1) {
+      int k = j;
+      while (true) {
+        i = k;
+        if (Character.isDigit(str.charAt(k))) {
+          i = ++k;
+          if (k < str.length())
+            continue; 
+        } 
+        break;
+      } 
+    } else {
+      i = j;
+    } 
+    if (i > j)
+      jvmUpdateNumber = Integer.parseInt(str.substring(j, i)); 
+    String str = stackTraceToString(new Throwable());
+    if (str != null) {
+      if (str.indexOf("coldfusion") == -1)
+        bool = false; 
+      isColdFusion = bool;
+    } else {
+      isColdFusion = false;
+    } 
+    isJdbcInterfaceCache = new ConcurrentHashMap<Class<?>, Boolean>();
+    str = getPackageName(MultiHostConnectionProxy.class);
+    MYSQL_JDBC_PACKAGE_ROOT = str.substring(0, str.indexOf("jdbc") + 4);
+    implementedInterfacesCache = (ConcurrentMap)new ConcurrentHashMap<Class<?>, Class<?>>();
+  }
+  
+  public static Map<Object, Object> calculateDifferences(Map<?, ?> paramMap1, Map<?, ?> paramMap2) {
+    HashMap<Object, Object> hashMap = new HashMap<Object, Object>();
+    Iterator<Map.Entry> iterator = paramMap1.entrySet().iterator();
+    while (true) {
+      Number number;
+      Object object;
+      if (iterator.hasNext()) {
+        Number number1;
+        Map.Entry entry = iterator.next();
+        object = entry.getKey();
+        if (entry.getValue() instanceof Number) {
+          number = (Number)entry.getValue();
+          number1 = (Number)paramMap2.get(object);
+        } else {
+          try {
+            number = new Double();
+            this(number1.getValue().toString());
+            number1 = new Double(paramMap2.get(object).toString());
+            if (number.equals(number1))
+              continue; 
+            if (number instanceof Byte) {
+              hashMap.put(object, Byte.valueOf((byte)(((Byte)number1).byteValue() - ((Byte)number).byteValue())));
+              continue;
+            } 
+            if (number instanceof Short) {
+              hashMap.put(object, Short.valueOf((short)(((Short)number1).shortValue() - ((Short)number).shortValue())));
+              continue;
+            } 
+            if (number instanceof Integer) {
+              hashMap.put(object, Integer.valueOf(((Integer)number1).intValue() - ((Integer)number).intValue()));
+              continue;
+            } 
+            if (number instanceof Long) {
+              hashMap.put(object, Long.valueOf(((Long)number1).longValue() - ((Long)number).longValue()));
+              continue;
+            } 
+            if (number instanceof Float) {
+              hashMap.put(object, Float.valueOf(((Float)number1).floatValue() - ((Float)number).floatValue()));
+              continue;
+            } 
+            if (number instanceof Double) {
+              hashMap.put(object, Double.valueOf((((Double)number1).shortValue() - number.shortValue())));
+              continue;
+            } 
+            if (number instanceof BigDecimal) {
+              hashMap.put(object, ((BigDecimal)number1).subtract((BigDecimal)number));
+              continue;
+            } 
+            if (number instanceof BigInteger)
+              hashMap.put(object, ((BigInteger)number1).subtract((BigInteger)number)); 
+          } catch (NumberFormatException numberFormatException) {}
+          continue;
+        } 
+      } else {
+        break;
+      } 
+      if (number.equals(numberFormatException))
+        continue; 
+      if (number instanceof Byte) {
+        hashMap.put(object, Byte.valueOf((byte)(((Byte)numberFormatException).byteValue() - ((Byte)number).byteValue())));
+        continue;
+      } 
+      if (number instanceof Short) {
+        hashMap.put(object, Short.valueOf((short)(((Short)numberFormatException).shortValue() - ((Short)number).shortValue())));
+        continue;
+      } 
+      if (number instanceof Integer) {
+        hashMap.put(object, Integer.valueOf(((Integer)numberFormatException).intValue() - ((Integer)number).intValue()));
+        continue;
+      } 
+      if (number instanceof Long) {
+        hashMap.put(object, Long.valueOf(((Long)numberFormatException).longValue() - ((Long)number).longValue()));
+        continue;
+      } 
+      if (number instanceof Float) {
+        hashMap.put(object, Float.valueOf(((Float)numberFormatException).floatValue() - ((Float)number).floatValue()));
+        continue;
+      } 
+      if (number instanceof Double) {
+        hashMap.put(object, Double.valueOf((((Double)numberFormatException).shortValue() - ((Double)number).shortValue())));
+        continue;
+      } 
+      if (number instanceof BigDecimal) {
+        hashMap.put(object, ((BigDecimal)numberFormatException).subtract((BigDecimal)number));
+        continue;
+      } 
+      if (number instanceof BigInteger)
+        hashMap.put(object, ((BigInteger)numberFormatException).subtract((BigInteger)number)); 
+    } 
+    return hashMap;
+  }
+  
+  public static Class<?>[] getImplementedInterfaces(Class<?> paramClass) {
+    Class[] arrayOfClass = implementedInterfacesCache.get(paramClass);
+    if (arrayOfClass != null)
+      return arrayOfClass; 
+    LinkedHashSet<? super Class<?>> linkedHashSet = new LinkedHashSet();
+    Class<?> clazz = paramClass;
+    while (true) {
+      Collections.addAll(linkedHashSet, clazz.getInterfaces());
+      Class<?> clazz1 = clazz.getSuperclass();
+      clazz = clazz1;
+      if (clazz1 == null) {
+        Class[] arrayOfClass2 = (Class[])linkedHashSet.<Class<?>[]>toArray((Class<?>[][])new Class[linkedHashSet.size()]);
+        Class[] arrayOfClass3 = implementedInterfacesCache.putIfAbsent(paramClass, arrayOfClass2);
+        Class[] arrayOfClass1 = arrayOfClass2;
+        if (arrayOfClass3 != null)
+          arrayOfClass1 = arrayOfClass3; 
+        return arrayOfClass1;
+      } 
+    } 
+  }
+  
+  public static Object getInstance(String paramString, Class<?>[] paramArrayOfClass, Object[] paramArrayOfObject, ExceptionInterceptor paramExceptionInterceptor) throws SQLException {
     try {
-      paramString = IDN.toASCII(paramString).toLowerCase(Locale.US);
-      if (paramString.isEmpty())
-        return null; 
-      boolean bool = containsInvalidHostnameAsciiCodes(paramString);
-      return bool ? null : paramString;
+      return handleNewInstance(Class.forName(paramString).getConstructor(paramArrayOfClass), paramArrayOfObject, paramExceptionInterceptor);
+    } catch (SecurityException securityException) {
+      throw SQLError.createSQLException("Can't instantiate required class", "S1000", securityException, paramExceptionInterceptor);
+    } catch (NoSuchMethodException noSuchMethodException) {
+      throw SQLError.createSQLException("Can't instantiate required class", "S1000", noSuchMethodException, paramExceptionInterceptor);
+    } catch (ClassNotFoundException classNotFoundException) {
+      throw SQLError.createSQLException("Can't instantiate required class", "S1000", classNotFoundException, paramExceptionInterceptor);
+    } 
+  }
+  
+  public static int getJVMUpdateNumber() {
+    return jvmUpdateNumber;
+  }
+  
+  public static int getJVMVersion() {
+    return jvmVersion;
+  }
+  
+  public static String getPackageName(Class<?> paramClass) {
+    String str = paramClass.getName();
+    int i = str.lastIndexOf('.');
+    return (i > 0) ? str.substring(0, i) : "";
+  }
+  
+  public static final Object handleNewInstance(Constructor<?> paramConstructor, Object[] paramArrayOfObject, ExceptionInterceptor paramExceptionInterceptor) throws SQLException {
+    try {
+      return paramConstructor.newInstance(paramArrayOfObject);
     } catch (IllegalArgumentException illegalArgumentException) {
-      return null;
-    } 
-  }
-  
-  public static int checkDuration(String paramString, long paramLong, TimeUnit paramTimeUnit) {
-    int i = paramLong cmp 0L;
-    if (i >= 0) {
-      Objects.requireNonNull(paramTimeUnit, "unit == null");
-      paramLong = paramTimeUnit.toMillis(paramLong);
-      if (paramLong <= 2147483647L) {
-        if (paramLong != 0L || i <= 0)
-          return (int)paramLong; 
-        StringBuilder stringBuilder2 = new StringBuilder();
-        stringBuilder2.append(paramString);
-        stringBuilder2.append(" too small.");
-        throw new IllegalArgumentException(stringBuilder2.toString());
+      throw SQLError.createSQLException("Can't instantiate required class", "S1000", illegalArgumentException, paramExceptionInterceptor);
+    } catch (InstantiationException instantiationException) {
+      throw SQLError.createSQLException("Can't instantiate required class", "S1000", instantiationException, paramExceptionInterceptor);
+    } catch (IllegalAccessException illegalAccessException) {
+      throw SQLError.createSQLException("Can't instantiate required class", "S1000", illegalAccessException, paramExceptionInterceptor);
+    } catch (InvocationTargetException invocationTargetException) {
+      Throwable throwable = invocationTargetException.getTargetException();
+      if (!(throwable instanceof SQLException)) {
+        Throwable throwable1 = throwable;
+        if (throwable instanceof ExceptionInInitializerError)
+          throwable1 = ((ExceptionInInitializerError)throwable).getException(); 
+        throw SQLError.createSQLException(throwable1.toString(), "S1000", throwable1, paramExceptionInterceptor);
       } 
-      StringBuilder stringBuilder1 = new StringBuilder();
-      stringBuilder1.append(paramString);
-      stringBuilder1.append(" too large.");
-      throw new IllegalArgumentException(stringBuilder1.toString());
+      throw (SQLException)throwable;
     } 
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append(paramString);
-    stringBuilder.append(" < 0");
-    throw new IllegalArgumentException(stringBuilder.toString());
   }
   
-  public static void checkOffsetAndCount(long paramLong1, long paramLong2, long paramLong3) {
-    if ((paramLong2 | paramLong3) >= 0L && paramLong2 <= paramLong1 && paramLong1 - paramLong2 >= paramLong3)
-      return; 
-    throw new ArrayIndexOutOfBoundsException();
+  public static long[] hashPre41Password(String paramString) {
+    return hashPre41Password(paramString, Charset.defaultCharset().name());
   }
   
-  public static void closeQuietly(Closeable paramCloseable) {
-    if (paramCloseable != null)
-      try {
-        paramCloseable.close();
-      } catch (RuntimeException runtimeException) {
-        throw runtimeException;
-      } catch (Exception exception) {} 
-  }
-  
-  public static void closeQuietly(ServerSocket paramServerSocket) {
-    if (paramServerSocket != null)
-      try {
-        paramServerSocket.close();
-      } catch (RuntimeException runtimeException) {
-        throw runtimeException;
-      } catch (Exception exception) {} 
-  }
-  
-  public static void closeQuietly(Socket paramSocket) {
-    if (paramSocket != null)
-      try {
-        paramSocket.close();
-      } catch (AssertionError assertionError) {
-        if (!isAndroidGetsocknameError(assertionError))
-          throw assertionError; 
-      } catch (RuntimeException runtimeException) {
-        throw runtimeException;
-      } catch (Exception exception) {} 
-  }
-  
-  public static String[] concat(String[] paramArrayOfString, String paramString) {
-    int i = paramArrayOfString.length + 1;
-    String[] arrayOfString = new String[i];
-    System.arraycopy(paramArrayOfString, 0, arrayOfString, 0, paramArrayOfString.length);
-    arrayOfString[i - 1] = paramString;
-    return arrayOfString;
-  }
-  
-  private static boolean containsInvalidHostnameAsciiCodes(String paramString) {
-    for (byte b = 0; b < paramString.length(); b++) {
-      char c = paramString.charAt(b);
-      if (c <= '\037' || c >= '')
-        return true; 
-      if (" #%/:?@[\\]".indexOf(c) != -1)
-        return true; 
+  public static long[] hashPre41Password(String paramString1, String paramString2) {
+    try {
+      return newHash(paramString1.replaceAll("\\s", "").getBytes(paramString2));
+    } catch (UnsupportedEncodingException unsupportedEncodingException) {
+      return new long[0];
     } 
+  }
+  
+  public static boolean interfaceExists(String paramString) {
+    boolean bool = false;
+    try {
+      Class<?> clazz = Class.forName("java.net.NetworkInterface");
+      Object object = clazz.getMethod("getByName", null).invoke(clazz, new Object[] { paramString });
+      if (object != null)
+        bool = true; 
+    } finally {}
+    return bool;
+  }
+  
+  public static boolean isColdFusion() {
+    return isColdFusion;
+  }
+  
+  public static boolean isCommunityEdition(String paramString) {
+    return isEnterpriseEdition(paramString) ^ true;
+  }
+  
+  public static boolean isEnterpriseEdition(String paramString) {
+    return (paramString.contains("enterprise") || paramString.contains("commercial") || paramString.contains("advanced"));
+  }
+  
+  public static boolean isJdbc4() {
+    return isJdbc4;
+  }
+  
+  public static boolean isJdbc42() {
+    return isJdbc42;
+  }
+  
+  public static boolean isJdbcInterface(Class<?> paramClass) {
+    ConcurrentMap<Class<?>, Boolean> concurrentMap = isJdbcInterfaceCache;
+    if (concurrentMap.containsKey(paramClass))
+      return ((Boolean)concurrentMap.get(paramClass)).booleanValue(); 
+    if (paramClass.isInterface())
+      try {
+        if (isJdbcPackage(getPackageName(paramClass))) {
+          concurrentMap.putIfAbsent(paramClass, Boolean.TRUE);
+          return true;
+        } 
+      } catch (Exception exception) {} 
+    Class[] arrayOfClass = paramClass.getInterfaces();
+    int i = arrayOfClass.length;
+    for (byte b = 0; b < i; b++) {
+      if (isJdbcInterface(arrayOfClass[b])) {
+        isJdbcInterfaceCache.putIfAbsent(paramClass, Boolean.TRUE);
+        return true;
+      } 
+    } 
+    if (paramClass.getSuperclass() != null && isJdbcInterface(paramClass.getSuperclass())) {
+      isJdbcInterfaceCache.putIfAbsent(paramClass, Boolean.TRUE);
+      return true;
+    } 
+    isJdbcInterfaceCache.putIfAbsent(paramClass, Boolean.FALSE);
     return false;
   }
   
-  public static int decodeHexDigit(char paramChar) {
-    if (paramChar >= '0' && paramChar <= '9')
-      return paramChar - 48; 
-    byte b = 97;
-    if (paramChar < 'a' || paramChar > 'f') {
-      b = 65;
-      if (paramChar < 'A' || paramChar > 'F')
-        return -1; 
-    } 
-    return paramChar - b + 10;
-  }
-  
-  private static boolean decodeIpv4Suffix(String paramString, int paramInt1, int paramInt2, byte[] paramArrayOfbyte, int paramInt3) {
-    int j = paramInt3;
-    int i = paramInt1;
-    while (i < paramInt2) {
-      if (j == paramArrayOfbyte.length)
-        return false; 
-      paramInt1 = i;
-      if (j != paramInt3) {
-        if (paramString.charAt(i) != '.')
-          return false; 
-        paramInt1 = i + 1;
-      } 
-      i = paramInt1;
-      int k = 0;
-      while (i < paramInt2) {
-        char c = paramString.charAt(i);
-        if (c < '0' || c > '9')
-          break; 
-        if (!k && paramInt1 != i)
-          return false; 
-        k = k * 10 + c - 48;
-        if (k > 255)
-          return false; 
-        i++;
-      } 
-      if (i - paramInt1 == 0)
-        return false; 
-      paramArrayOfbyte[j] = (byte)k;
-      j++;
-    } 
-    return !(j != paramInt3 + 4);
-  }
-  
-  @Nullable
-  private static InetAddress decodeIpv6(String paramString, int paramInt1, int paramInt2) {
-    int j;
-    int n;
-    byte[] arrayOfByte = new byte[16];
-    int i = 0;
-    int k = -1;
-    int m = -1;
-    while (true) {
-      j = i;
-      n = k;
-      if (paramInt1 < paramInt2) {
-        if (i == 16)
-          return null; 
-        n = paramInt1 + 2;
-        if (n <= paramInt2 && paramString.regionMatches(paramInt1, "::", 0, 2)) {
-          if (k != -1)
-            return null; 
-          j = i + 2;
-          paramInt1 = j;
-          if (n == paramInt2) {
-            n = paramInt1;
-            break;
-          } 
-          m = n;
-          i = j;
-          k = paramInt1;
-          paramInt1 = m;
-        } else {
-          j = paramInt1;
-          if (i != 0)
-            if (paramString.regionMatches(paramInt1, ":", 0, 1)) {
-              j = paramInt1 + 1;
-            } else {
-              if (paramString.regionMatches(paramInt1, ".", 0, 1)) {
-                if (!decodeIpv4Suffix(paramString, m, paramInt2, arrayOfByte, i - 2))
-                  return null; 
-                j = i + 2;
-                n = k;
-                break;
-              } 
-              return null;
-            }  
-          paramInt1 = j;
-        } 
-        j = paramInt1;
-        m = 0;
-        while (j < paramInt2) {
-          n = decodeHexDigit(paramString.charAt(j));
-          if (n == -1)
-            break; 
-          m = (m << 4) + n;
-          j++;
-        } 
-        n = j - paramInt1;
-        if (n == 0 || n > 4)
-          return null; 
-        n = i + 1;
-        arrayOfByte[i] = (byte)(m >>> 8 & 0xFF);
-        i = n + 1;
-        arrayOfByte[n] = (byte)(m & 0xFF);
-        m = paramInt1;
-        paramInt1 = j;
-        continue;
-      } 
-      break;
-    } 
-    if (j != 16) {
-      if (n == -1)
-        return null; 
-      paramInt1 = j - n;
-      System.arraycopy(arrayOfByte, n, arrayOfByte, 16 - paramInt1, paramInt1);
-      Arrays.fill(arrayOfByte, n, 16 - j + n, (byte)0);
-    } 
-    try {
-      return InetAddress.getByAddress(arrayOfByte);
-    } catch (UnknownHostException unknownHostException) {
-      throw new AssertionError();
-    } 
-  }
-  
-  public static int delimiterOffset(String paramString, int paramInt1, int paramInt2, char paramChar) {
-    while (paramInt1 < paramInt2) {
-      if (paramString.charAt(paramInt1) == paramChar)
-        return paramInt1; 
-      paramInt1++;
-    } 
-    return paramInt2;
-  }
-  
-  public static int delimiterOffset(String paramString1, int paramInt1, int paramInt2, String paramString2) {
-    while (paramInt1 < paramInt2) {
-      if (paramString2.indexOf(paramString1.charAt(paramInt1)) != -1)
-        return paramInt1; 
-      paramInt1++;
-    } 
-    return paramInt2;
-  }
-  
-  public static boolean discard(丨lL param丨lL, int paramInt, TimeUnit paramTimeUnit) {
-    try {
-      return skipAll(param丨lL, paramInt, paramTimeUnit);
-    } catch (IOException iOException) {
-      return false;
-    } 
-  }
-  
-  public static String format(String paramString, Object... paramVarArgs) {
-    return String.format(Locale.US, paramString, paramVarArgs);
-  }
-  
-  public static String getSystemProperty(String paramString1, @Nullable String paramString2) {
-    try {
-      paramString1 = System.getProperty(paramString1);
-      if (paramString1 != null)
-        paramString2 = paramString1; 
-    } catch (AccessControlException accessControlException) {}
-    return paramString2;
-  }
-  
-  public static String hostHeader(HttpUrl paramHttpUrl, boolean paramBoolean) {
-    String str;
-    if (paramHttpUrl.host().contains(":")) {
-      StringBuilder stringBuilder1 = new StringBuilder();
-      stringBuilder1.append("[");
-      stringBuilder1.append(paramHttpUrl.host());
-      stringBuilder1.append("]");
-      str = stringBuilder1.toString();
+  public static boolean isJdbcPackage(String paramString) {
+    boolean bool;
+    if (paramString != null && (paramString.startsWith("java.sql") || paramString.startsWith("javax.sql") || paramString.startsWith(MYSQL_JDBC_PACKAGE_ROOT))) {
+      bool = true;
     } else {
-      str = paramHttpUrl.host();
+      bool = false;
     } 
-    if (!paramBoolean) {
-      String str1 = str;
-      if (paramHttpUrl.port() != HttpUrl.defaultPort(paramHttpUrl.scheme())) {
-        StringBuilder stringBuilder1 = new StringBuilder();
-        stringBuilder1.append(str);
-        stringBuilder1.append(":");
-        stringBuilder1.append(paramHttpUrl.port());
-        return stringBuilder1.toString();
+    return bool;
+  }
+  
+  public static boolean jvmMeetsMinimum(int paramInt1, int paramInt2) {
+    return (getJVMVersion() > paramInt1 || (getJVMVersion() == paramInt1 && getJVMUpdateNumber() >= paramInt2));
+  }
+  
+  public static List<Extension> loadExtensions(Connection paramConnection, Properties paramProperties, String paramString1, String paramString2, ExceptionInterceptor paramExceptionInterceptor) throws SQLException {
+    LinkedList<Extension> linkedList = new LinkedList();
+    List<String> list = StringUtils.split(paramString1, ",", true);
+    paramString1 = null;
+    String str = null;
+    try {
+      int i = list.size();
+      byte b = 0;
+      paramString1 = str;
+      while (true) {
+        if (b < i) {
+          str = list.get(b);
+          try {
+            Extension extension = (Extension)Class.forName(str).newInstance();
+            extension.init(paramConnection, paramProperties);
+            linkedList.add(extension);
+            b++;
+            continue;
+          } finally {
+            paramConnection = null;
+          } 
+        } else {
+          return linkedList;
+        } 
+        SQLException sQLException1 = SQLError.createSQLException(Messages.getString(paramString2, new Object[] { paramString1 }), paramExceptionInterceptor);
+        sQLException1.initCause((Throwable)paramConnection);
+        throw sQLException1;
       } 
-      return str1;
+    } finally {}
+    SQLException sQLException = SQLError.createSQLException(Messages.getString(paramString2, new Object[] { paramString1 }), paramExceptionInterceptor);
+    sQLException.initCause((Throwable)paramConnection);
+    throw sQLException;
+  }
+  
+  public static String newCrypt(String paramString1, String paramString2, String paramString3) {
+    String str1 = paramString1;
+    String str2 = str1;
+    if (str1 != null)
+      if (paramString1.length() == 0) {
+        str2 = str1;
+      } else {
+        long[] arrayOfLong1 = newHash(paramString2.getBytes());
+        long[] arrayOfLong2 = hashPre41Password(str1, paramString3);
+        boolean bool = false;
+        long l2 = (arrayOfLong1[0] ^ arrayOfLong2[0]) % 1073741823L;
+        long l1 = (arrayOfLong1[1] ^ arrayOfLong2[1]) % 1073741823L;
+        char[] arrayOfChar = new char[paramString2.length()];
+        byte b;
+        for (b = 0; b < paramString2.length(); b++) {
+          l2 = (l2 * 3L + l1) % 1073741823L;
+          l1 = (l1 + l2 + 33L) % 1073741823L;
+          arrayOfChar[b] = (char)(byte)(int)Math.floor(l2 / 1073741823L * 31.0D + 64.0D);
+        } 
+        Long.signum(l2);
+        l1 = (l2 * 3L + l1) % 1073741823L;
+        byte b1 = (byte)(int)Math.floor(l1 / 1073741823L * 31.0D);
+        for (b = bool; b < paramString2.length(); b++)
+          arrayOfChar[b] = (char)(arrayOfChar[b] ^ (char)b1); 
+        str2 = new String(arrayOfChar);
+      }  
+    return str2;
+  }
+  
+  public static long[] newHash(byte[] paramArrayOfbyte) {
+    int i = paramArrayOfbyte.length;
+    long l3 = 1345345333L;
+    long l2 = 7L;
+    long l1 = 305419889L;
+    for (byte b = 0; b < i; b++) {
+      long l = (paramArrayOfbyte[b] & 0xFF);
+      l3 ^= ((0x3FL & l3) + l2) * l + (l3 << 8L);
+      l1 += l1 << 8L ^ l3;
+      l2 += l;
     } 
+    return new long[] { l3 & 0x7FFFFFFFL, l1 & 0x7FFFFFFFL };
+  }
+  
+  public static String oldCrypt(String paramString1, String paramString2) {
+    if (paramString1 == null || paramString1.length() == 0)
+      return paramString1; 
+    long l2 = (oldHash(paramString2) ^ oldHash(paramString1)) % 33554431L;
+    long l1 = l2 / 2L;
+    char[] arrayOfChar = new char[paramString2.length()];
+    for (byte b = 0; b < paramString2.length(); b++) {
+      l2 = (l2 * 3L + l1) % 33554431L;
+      l1 = (l1 + l2 + 33L) % 33554431L;
+      arrayOfChar[b] = (char)(byte)(int)Math.floor(l2 / 33554431L * 31.0D + 64.0D);
+    } 
+    return new String(arrayOfChar);
+  }
+  
+  public static long oldHash(String paramString) {
+    long l2 = 1345345333L;
+    long l1 = 7L;
+    byte b = 0;
+    while (b < paramString.length()) {
+      long l4 = l2;
+      long l3 = l1;
+      if (paramString.charAt(b) != ' ')
+        if (paramString.charAt(b) == '\t') {
+          l4 = l2;
+          l3 = l1;
+        } else {
+          l3 = paramString.charAt(b);
+          l4 = l2 ^ ((0x3FL & l2) + l1) * l3 + (l2 << 8L);
+          l3 = l1 + l3;
+        }  
+      b++;
+      l2 = l4;
+      l1 = l3;
+    } 
+    return l2 & 0x7FFFFFFFL;
+  }
+  
+  private static RandStructcture randomInit(long paramLong1, long paramLong2) {
+    Util util = enclosingInstance;
+    util.getClass();
+    RandStructcture randStructcture = new RandStructcture();
+    randStructcture.maxValue = 1073741823L;
+    randStructcture.maxValueDbl = 1073741823L;
+    randStructcture.seed1 = paramLong1 % 1073741823L;
+    randStructcture.seed2 = paramLong2 % 1073741823L;
+    return randStructcture;
+  }
+  
+  public static Object readObject(ResultSet paramResultSet, int paramInt) throws Exception {
+    ObjectInputStream objectInputStream = new ObjectInputStream(paramResultSet.getBinaryStream(paramInt));
+    Object object = objectInputStream.readObject();
+    objectInputStream.close();
+    return object;
+  }
+  
+  public static void resultSetToMap(Map<Object, Object> paramMap, ResultSet paramResultSet) throws SQLException {
+    while (paramResultSet.next())
+      paramMap.put(paramResultSet.getObject(1), paramResultSet.getObject(2)); 
+  }
+  
+  public static void resultSetToMap(Map<Object, Object> paramMap, ResultSet paramResultSet, int paramInt1, int paramInt2) throws SQLException {
+    while (paramResultSet.next())
+      paramMap.put(paramResultSet.getObject(paramInt1), paramResultSet.getObject(paramInt2)); 
+  }
+  
+  public static void resultSetToMap(Map<Object, Object> paramMap, ResultSet paramResultSet, String paramString1, String paramString2) throws SQLException {
+    while (paramResultSet.next())
+      paramMap.put(paramResultSet.getObject(paramString1), paramResultSet.getObject(paramString2)); 
+  }
+  
+  private static double rnd(RandStructcture paramRandStructcture) {
+    long l3 = paramRandStructcture.seed1;
+    long l2 = paramRandStructcture.seed2;
+    long l1 = paramRandStructcture.maxValue;
+    l3 = (l3 * 3L + l2) % l1;
+    paramRandStructcture.seed1 = l3;
+    paramRandStructcture.seed2 = (l2 + l3 + 33L) % l1;
+    return l3 / paramRandStructcture.maxValueDbl;
+  }
+  
+  public static String scramble(String paramString1, String paramString2) {
+    byte[] arrayOfByte = new byte[8];
+    boolean bool = false;
+    paramString1 = paramString1.substring(0, 8);
+    if (paramString2 != null && paramString2.length() > 0) {
+      long[] arrayOfLong2 = hashPre41Password(paramString2);
+      long[] arrayOfLong1 = newHash(paramString1.getBytes());
+      RandStructcture randStructcture = randomInit(arrayOfLong2[0] ^ arrayOfLong1[0], arrayOfLong2[1] ^ arrayOfLong1[1]);
+      int i = paramString1.length();
+      byte b = 0;
+      byte b1 = 0;
+      while (b < i) {
+        arrayOfByte[b1] = (byte)(int)(Math.floor(rnd(randStructcture) * 31.0D) + 64.0D);
+        b1++;
+        b++;
+      } 
+      b1 = (byte)(int)Math.floor(rnd(randStructcture) * 31.0D);
+      for (b = bool; b < 8; b++)
+        arrayOfByte[b] = (byte)(arrayOfByte[b] ^ b1); 
+      paramString1 = StringUtils.toString(arrayOfByte);
+    } else {
+      paramString1 = "";
+    } 
+    return paramString1;
+  }
+  
+  public static long secondsSinceMillis(long paramLong) {
+    return (System.currentTimeMillis() - paramLong) / 1000L;
+  }
+  
+  public static String stackTraceToString(Throwable paramThrowable) {
     StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append(str);
-    stringBuilder.append(":");
-    stringBuilder.append(paramHttpUrl.port());
+    stringBuilder.append(Messages.getString("Util.1"));
+    if (paramThrowable != null) {
+      stringBuilder.append(paramThrowable.getClass().getName());
+      String str = paramThrowable.getMessage();
+      if (str != null) {
+        stringBuilder.append(Messages.getString("Util.2"));
+        stringBuilder.append(str);
+      } 
+      StringWriter stringWriter = new StringWriter();
+      paramThrowable.printStackTrace(new PrintWriter(stringWriter));
+      stringBuilder.append(Messages.getString("Util.3"));
+      stringBuilder.append(stringWriter.toString());
+    } 
+    stringBuilder.append(Messages.getString("Util.4"));
     return stringBuilder.toString();
   }
   
-  public static <T> List<T> immutableList(List<T> paramList) {
-    return Collections.unmodifiableList(new ArrayList<T>(paramList));
-  }
-  
-  @SafeVarargs
-  public static <T> List<T> immutableList(T... paramVarArgs) {
-    return Collections.unmodifiableList(Arrays.asList((T[])paramVarArgs.clone()));
-  }
-  
-  public static <K, V> Map<K, V> immutableMap(Map<K, V> paramMap) {
-    if (paramMap.isEmpty()) {
-      paramMap = Collections.emptyMap();
+  public static int truncateAndConvertToInt(long paramLong) {
+    int i;
+    if (paramLong > 2147483647L) {
+      i = Integer.MAX_VALUE;
+    } else if (paramLong < -2147483648L) {
+      i = Integer.MIN_VALUE;
     } else {
-      paramMap = Collections.unmodifiableMap(new LinkedHashMap<K, V>(paramMap));
+      i = (int)paramLong;
     } 
-    return paramMap;
+    return i;
   }
   
-  public static int indexOf(Comparator<String> paramComparator, String[] paramArrayOfString, String paramString) {
-    int i = paramArrayOfString.length;
-    for (byte b = 0; b < i; b++) {
-      if (paramComparator.compare(paramArrayOfString[b], paramString) == 0)
-        return b; 
-    } 
-    return -1;
-  }
-  
-  public static int indexOfControlOrNonAscii(String paramString) {
-    int i = paramString.length();
-    for (byte b = 0; b < i; b++) {
-      char c = paramString.charAt(b);
-      if (c <= '\037' || c >= '')
-        return b; 
-    } 
-    return -1;
-  }
-  
-  private static String inet6AddressToAscii(byte[] paramArrayOfbyte) {
-    boolean bool = false;
-    int k = -1;
-    int i = 0;
-    int j;
-    for (j = 0; i < paramArrayOfbyte.length; j = n) {
-      int m;
-      for (m = i; m < 16 && paramArrayOfbyte[m] == 0 && paramArrayOfbyte[m + 1] == 0; m += 2);
-      int i2 = m - i;
-      int i1 = k;
-      int n = j;
-      if (i2 > j) {
-        i1 = k;
-        n = j;
-        if (i2 >= 4) {
-          n = i2;
-          i1 = i;
-        } 
-      } 
-      i = m + 2;
-      k = i1;
-    } 
-    I1I i1I = new I1I();
-    for (i = bool; i < paramArrayOfbyte.length; i += 2) {
-      if (i == k) {
-        i1I.iI(58);
-        int m = i + j;
-        i = m;
-        if (m == 16) {
-          i1I.iI(58);
-          i = m;
-        } 
-        continue;
-      } 
-      if (i > 0)
-        i1I.iI(58); 
-      i1I.I丨(((paramArrayOfbyte[i] & 0xFF) << 8 | paramArrayOfbyte[i + 1] & 0xFF));
-    } 
-    return i1I.iIi1();
-  }
-  
-  public static String[] intersect(Comparator<? super String> paramComparator, String[] paramArrayOfString1, String[] paramArrayOfString2) {
-    ArrayList<String> arrayList = new ArrayList();
-    int i = paramArrayOfString1.length;
-    for (byte b = 0; b < i; b++) {
-      String str = paramArrayOfString1[b];
-      int j = paramArrayOfString2.length;
-      for (byte b1 = 0; b1 < j; b1++) {
-        if (paramComparator.compare(str, paramArrayOfString2[b1]) == 0) {
-          arrayList.add(str);
-          break;
-        } 
-      } 
-    } 
-    return arrayList.<String>toArray(new String[arrayList.size()]);
-  }
-  
-  public static boolean isAndroidGetsocknameError(AssertionError paramAssertionError) {
-    boolean bool;
-    if (paramAssertionError.getCause() != null && paramAssertionError.getMessage() != null && paramAssertionError.getMessage().contains("getsockname failed")) {
-      bool = true;
-    } else {
-      bool = false;
-    } 
-    return bool;
-  }
-  
-  public static boolean nonEmptyIntersection(Comparator<String> paramComparator, String[] paramArrayOfString1, String[] paramArrayOfString2) {
-    if (paramArrayOfString1 != null && paramArrayOfString2 != null && paramArrayOfString1.length != 0 && paramArrayOfString2.length != 0) {
-      int i = paramArrayOfString1.length;
-      for (byte b = 0; b < i; b++) {
-        String str = paramArrayOfString1[b];
-        int j = paramArrayOfString2.length;
-        for (byte b1 = 0; b1 < j; b1++) {
-          if (paramComparator.compare(str, paramArrayOfString2[b1]) == 0)
-            return true; 
-        } 
-      } 
-    } 
-    return false;
-  }
-  
-  public static X509TrustManager platformTrustManager() {
-    try {
-      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-      trustManagerFactory.init((KeyStore)null);
-      TrustManager[] arrayOfTrustManager = trustManagerFactory.getTrustManagers();
-      if (arrayOfTrustManager.length == 1 && arrayOfTrustManager[0] instanceof X509TrustManager)
-        return (X509TrustManager)arrayOfTrustManager[0]; 
-      IllegalStateException illegalStateException = new IllegalStateException();
-      StringBuilder stringBuilder = new StringBuilder();
-      this();
-      stringBuilder.append("Unexpected default trust managers:");
-      stringBuilder.append(Arrays.toString((Object[])arrayOfTrustManager));
-      this(stringBuilder.toString());
-      throw illegalStateException;
-    } catch (GeneralSecurityException generalSecurityException) {
-      throw new AssertionError("No System TLS", generalSecurityException);
-    } 
-  }
-  
-  public static boolean sameConnection(HttpUrl paramHttpUrl1, HttpUrl paramHttpUrl2) {
-    boolean bool;
-    if (paramHttpUrl1.host().equals(paramHttpUrl2.host()) && paramHttpUrl1.port() == paramHttpUrl2.port() && paramHttpUrl1.scheme().equals(paramHttpUrl2.scheme())) {
-      bool = true;
-    } else {
-      bool = false;
-    } 
-    return bool;
-  }
-  
-  public static boolean skipAll(丨lL param丨lL, int paramInt, TimeUnit paramTimeUnit) throws IOException {
-    long l1;
-    long l2 = System.nanoTime();
-    if (param丨lL.timeout().hasDeadline()) {
-      l1 = param丨lL.timeout().deadlineNanoTime() - l2;
-    } else {
-      l1 = Long.MAX_VALUE;
-    } 
-    param丨lL.timeout().deadlineNanoTime(Math.min(l1, paramTimeUnit.toNanos(paramInt)) + l2);
-    try {
-      I1I i1I = new I1I();
-      this();
-      while (param丨lL.read(i1I, 8192L) != -1L)
-        i1I.丨丨LLlI1(); 
-      return true;
-    } catch (InterruptedIOException interruptedIOException) {
-      return false;
-    } finally {
-      if (l1 == Long.MAX_VALUE) {
-        param丨lL.timeout().clearDeadline();
+  public static int[] truncateAndConvertToInt(long[] paramArrayOflong) {
+    int[] arrayOfInt = new int[paramArrayOflong.length];
+    for (byte b = 0; b < paramArrayOflong.length; b++) {
+      int i;
+      if (paramArrayOflong[b] > 2147483647L) {
+        i = Integer.MAX_VALUE;
+      } else if (paramArrayOflong[b] < -2147483648L) {
+        i = Integer.MIN_VALUE;
       } else {
-        param丨lL.timeout().deadlineNanoTime(l2 + l1);
+        i = (int)paramArrayOflong[b];
       } 
+      arrayOfInt[b] = i;
     } 
+    return arrayOfInt;
   }
   
-  public static int skipLeadingAsciiWhitespace(String paramString, int paramInt1, int paramInt2) {
-    while (paramInt1 < paramInt2) {
-      char c = paramString.charAt(paramInt1);
-      if (c != '\t' && c != '\n' && c != '\f' && c != '\r' && c != ' ')
-        return paramInt1; 
-      paramInt1++;
-    } 
-    return paramInt2;
-  }
-  
-  public static int skipTrailingAsciiWhitespace(String paramString, int paramInt1, int paramInt2) {
-    while (--paramInt2 >= paramInt1) {
-      char c = paramString.charAt(paramInt2);
-      if (c != '\t' && c != '\n' && c != '\f' && c != '\r' && c != ' ')
-        return paramInt2 + 1; 
-      paramInt2--;
-    } 
-    return paramInt1;
-  }
-  
-  public static ThreadFactory threadFactory(String paramString, boolean paramBoolean) {
-    return new ILil(paramString, paramBoolean);
-  }
-  
-  public static List<Header> toHeaderBlock(Headers paramHeaders) {
-    ArrayList<Header> arrayList = new ArrayList();
-    for (byte b = 0; b < paramHeaders.size(); b++)
-      arrayList.add(new Header(paramHeaders.name(b), paramHeaders.value(b))); 
-    return arrayList;
-  }
-  
-  public static Headers toHeaders(List<Header> paramList) {
-    Headers.Builder builder = new Headers.Builder();
-    for (Header header : paramList)
-      Internal.instance.addLenient(builder, header.name.utf8(), header.value.utf8()); 
-    return builder.build();
-  }
-  
-  public static String trimSubstring(String paramString, int paramInt1, int paramInt2) {
-    paramInt1 = skipLeadingAsciiWhitespace(paramString, paramInt1, paramInt2);
-    return paramString.substring(paramInt1, skipTrailingAsciiWhitespace(paramString, paramInt1, paramInt2));
-  }
-  
-  public static boolean verifyAsIpAddress(String paramString) {
-    return VERIFY_AS_IP_ADDRESS.matcher(paramString).matches();
-  }
-  
-  static {
-    byte[] arrayOfByte = new byte[0];
-    EMPTY_BYTE_ARRAY = arrayOfByte;
+  public class RandStructcture {
+    public long maxValue;
+    
+    public double maxValueDbl;
+    
+    public long seed1;
+    
+    public long seed2;
+    
+    public final Util this$0;
   }
 }
